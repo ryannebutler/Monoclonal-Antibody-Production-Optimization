@@ -1,0 +1,16 @@
+Metric,Value
+Initial Glucose [mM],20.0
+Initial Glutamine [mM],2.0
+Initial VCD [cells/mL],600000.0
+Harvest Time [d],5.666666666666667
+mAb [mg/L],0.9545582358698118
+Cost [$/L],540.0
+Value [$/L],954.5582358698118
+Value 95% PI Lower [$/L],795.6810829788714
+Value 95% PI Upper [$/L],1122.2095400017465
+STP [$/L/d],62.183735380471774
+STP 95% PI Lower [$/L/d],38.352162446830704
+STP 95% PI Upper [$/L/d],87.33143100026197
+STY [mg/L/d],0.14318373538047177
+STY 95% PI Lower [mg/L/d],0.11935216244683071
+STY 95% PI Upper [mg/L/d],0.16833143100026196
