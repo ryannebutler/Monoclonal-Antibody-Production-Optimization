@@ -1,5 +1,5 @@
 # Monoclonal Antibody Production Optimization
-This project uses machine learning to optimize monoclonal antibody production based on initial glucose concentration, glutamine concentration, viable cell density, and harvest time. A polynomial regression model is used to predict mAb concentration and determine the operating conditions that maximize space-time profit. Model performance is evaluated using validation results, prediction intervals, and process performance metrics.
+This project uses machine learning to optimize monoclonal antibody production based on initial glucose and glutamine concentrations, viable cell density, and harvest time. A polynomial regression model is used to predict mAb concentration and determine the operating conditions that maximize space-time profit. Model performance is evaluated using validation results, prediction intervals, and process performance metrics.
 ## Highlights
 - Selected 30 batch runs to cover the range of initial glucose, glutamine, and viable cell density conditions.
 - Developed and validated a polynomial regression model to predict monoclonal antibody concentration.
@@ -13,20 +13,20 @@ This project uses machine learning to optimize monoclonal antibody production ba
 - scikit-learn 1.9.0
 ## Code Design
 ### Data Selection and Preparation
-The project begins by loading the initial conditions and the 30 selected batch files. The batches were selected to provide coverage across the available ranges of initial glucose concentration, glutamine concentration, and viable cell density (VCD). This allows the model to learn from low, intermediate, and high operating conditions without requiring all available batch runs.
+The project begins by loading the initial conditions and the 30 selected batch files. The batches were selected to provide coverage across the available ranges of initial glucose and glutamine concentrations, and viable cell density (VCD). This allows the model to learn from low, intermediate, and high operating conditions without requiring all available batch runs.
 
 Each batch file is assigned its corresponding batch ID and combined into a single DataFrame. The initial conditions are then matched to each batch using the batch ID. The initial glucose, glutamine, and VCD values are added to the time-series data so that each measurement can be connected to the conditions used at the start of the batch.
 
 The economic and process performance variables are then calculated. Harvest time is converted from hours to days, and the initial operating cost is calculated from the glucose, glutamine, and VCD values. The mAb concentration is used to calculate product value and profit. Space-time profit (STP) and space-time yield (STY) are then calculated using the harvest time and the required one-day downtime between batches.
 ### Model Development and Validation
-A polynomial regression model is used to predict mAb concentration from the initial glucose concentration, initial glutamine concentration, initial VCD, and harvest time. The model is built using a scikit-learn pipeline that first standardizes the input variables, creates polynomial features, and then fits a linear regression model.
+A polynomial regression model is used to predict mAb concentration from the initial glucose and glutamine concentrations, initial VCD, and harvest time. The model is built using a scikit-learn pipeline that first standardizes the input variables, creates polynomial features, and then fits a linear regression model.
 
 Polynomial degrees of 1, 2, and 3 are compared to determine the model complexity that provides the best predictions. Leave-one-batch-out validation is used for the comparison. During each validation step, one complete batch is used as the test data while the remaining 29 batches are used for training. This process is repeated until every batch has been used for testing. Keeping each complete batch together prevents measurements from the same batch from appearing in both the training and test data.
 
 The root mean squared error (RMSE) is calculated for each test batch. The mean and maximum RMSE values are then compared across the three polynomial degrees. Degree 3 produces the lowest mean and maximum RMSE and is therefore selected for the final model. The validation results are saved as a table and plotted to show the effect of polynomial degree on prediction error.
 ### Process Optimization
 
-After selecting the degree 3 polynomial model, the model is trained using all 30 selected batches. The fitted model is then used to evaluate combinations of initial glucose concentration, glutamine concentration, VCD, and harvest time. The glucose, glutamine, and VCD levels are kept within the original experimental ranges, while the available harvest times are taken from the batch data.
+After selecting the degree 3 polynomial model, the model is trained using all 30 selected batches. The fitted model is then used to evaluate combinations of initial glucose and glutamine concentrations, VCD, and harvest time. The glucose, glutamine, and VCD levels are kept within the original experimental ranges, while the available harvest times are taken from the batch data.
 
 For each combination, the model predicts the mAb concentration. The predicted concentration is then used to calculate product value, profit, space-time profit, and space-time yield. The operating condition with the highest space-time profit is selected as the recommended condition. This approach considers both mAb production and the cost and time required to operate the process rather than selecting conditions based only on product concentration.
 
@@ -46,6 +46,7 @@ Polynomial degrees of 1, 2, and 3 were evaluated using leave-one-batch-out valid
 |1     |0.2039850533775082 |0.42765702446304676|
 |2     |0.11494986665932104|0.20186651096768085|
 |3     |0.08799701504480067|0.1366763366122957 |
+
 ![Polynomial degree validation](figures/polynomial_degree_validation.png)
 The decrease in validation error as polynomial degree increases indicates that the relationship between the operating variables, harvest time, and mAb concentration is nonlinear. Degree 3 was therefore selected for the final model because it produced the lowest prediction error of the models tested. The improvement in both mean and maximum RMSE also indicates that the degree 3 model provided more consistent predictions across the different batches.
 ### Model Comparison 
@@ -57,7 +58,7 @@ The direct model also has the advantage of connecting the variables that can be 
 ### Effect of Harvest Time
 Harvest time has an important effect on space-time profit because increasing the batch duration allows more mAb to be produced but also reduces the number of batches that can be completed over time. At the recommended initial conditions, space-time profit initially increases as harvest time increases. Very early harvests do not produce enough mAb value to recover the initial operating cost, resulting in low or negative profitability.
 
-The model predicts a maximum space-time profit at a harvest time of approximately 5.67 days, or 136 hours. Beyond this point, the additional value obtained from extending the batch is not sufficient to compensate for the longer operating cycle. Space-time profit therefore begins to decrease even though mAb may continue to be produced. This demonstrates the importance of considering both production and time when selecting the harvest point.
+The model predicts a maximum space-time profit at a harvest time of approximately 5.67 days. Beyond this point, the additional value obtained from extending the batch is not sufficient to compensate for the longer operating cycle. Space-time profit therefore begins to decrease even though mAb may continue to be produced. This demonstrates the importance of considering both production and time when selecting the harvest point.
 ![Space-time profit versus harvest time](figures/stp_vs_harvest_time.png)
 Space-time yield shows a different relationship with harvest time because it measures mAb production per unit of time without considering the cost of the initial operating conditions. This difference shows why space-time profit is the more appropriate optimization objective for this process. A condition can provide a high production rate while still being economically unattractive if the cost of operating the batch is too high.
 ### Effects of the Initial Conditions
@@ -90,6 +91,7 @@ The recommended conditions produce a predicted space-time profit of \$62.18/L/d 
 |STY [mg/L/d]|0.14318373538047177|
 |STY 95% PI Lower [mg/L/d]|0.11935216244683071|
 |STY 95% PI Upper [mg/L/d]|0.16833143100026196|
+
 The recommended conditions represent a balance between product formation, operating cost, and batch duration. The optimization does not select the highest available nutrient concentrations or VCD because the additional cost of these conditions does not provide enough additional product value. Similarly, extending the harvest time beyond the recommended point reduces space-time profit. The selected conditions therefore provide the highest predicted economic performance within the operating space evaluated by the model.
 ### Limitations and Final Assessment 
 The model provides a useful method for identifying profitable operating conditions, but several limitations should be considered. Only 30 batch runs were used from the full available dataset, so the model does not directly observe every possible combination of initial conditions. The selected batches were distributed across the operating space to reduce this limitation, but some predictions are still based on interpolation between the selected runs.
